@@ -6,7 +6,8 @@ import (
 
 type room struct {
 	Gui     string `json:"gui"`
-	players []*Player
+	currentPlayers uint8
+	maxPlayer uint8
 }
 
 const (
@@ -14,13 +15,5 @@ const (
 )
 
 func NewRoom(gui string, maxPlayers int) *room {
-	return &room{gui, make([]*Player, 0, maxPlayers)}
-}
-
-func (r *room) AddPlayer(player *Player) error {
-	if cap(r.players) == len(r.players) {
-		return errors.New(noSpaceLeftInRoom)
-	}
-	r.players = append(r.players, player)
-	return nil
+	return &room{gui, 0, maxPlayers}
 }

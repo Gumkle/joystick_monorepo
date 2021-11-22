@@ -56,6 +56,7 @@ func (c *controller) RegisterNewPlayer(w http.ResponseWriter, r *http.Request) {
 
 	player := &game.Player{
 		Nickname: payload.Nickname,
+		Room: game.GetRoom(payload.RoomCode).Channel,
 	}
 
 	gameRoom, err := c.engine.GetRoom(payload.RoomCode)
@@ -65,11 +66,7 @@ func (c *controller) RegisterNewPlayer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := gameRoom.AddPlayer(player); err != nil {
-		response := errorResponse{Message: err.Error()}
-		jsonResponse(w, response, http.StatusForbidden)
-		return
-	}
+	c.engine.AddToGlobalList(unique_id, player)
 
 	response := playerResponse{
 		Address:   "Somethingthatwillbereplaced",

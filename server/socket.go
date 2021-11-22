@@ -9,6 +9,7 @@ import (
 var counter uint8 = 0
 var upgrader = websocket.Upgrader{} // use default options
 
+// osobny endpoint dla gry
 func socketHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade our raw HTTP connection to a websocket based one
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -16,22 +17,34 @@ func socketHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print("Error during connection upgradation:", err)
 		return
 	}
-	id := counter
-	counter++
 	defer conn.Close()
-	// The event loop
+
+	// czekamy na message, dekodujemy unique id, jest timeout
+	player, ok :=c.engine.GetFromGlobalList(unique_id)
+	if !ok {
+		// wywal error
+	}
+	room := findRoomWith(player)
+
+	// jezeli unique id sie zagdza
 	for {
-		messageType, message, err := conn.ReadMessage()
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error during message reading:", err)
 			break
 		}
-		log.Printf("Received: %s from conn %d", message, id)
-		err = conn.WriteMessage(messageType, message)
-		if err != nil {
-			log.Println("Error during message writing:", err)
-			break
+		if messageType != websocket.BinaryMessage {
+			// wywal error
 		}
+		player.SendMessage(message)
+		//room.channel <- message
+		// wiadomosc ok
+
+
+		// sprawdzamy czy binarny
+		// jzeli bin to dekodujemy
+		// jezeli nie to continue
+		log.Printf("Received: %s from conn %d", message, id)
 	}
 }
 
